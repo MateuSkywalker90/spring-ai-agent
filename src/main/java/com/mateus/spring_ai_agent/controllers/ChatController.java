@@ -3,6 +3,7 @@ package com.mateus.spring_ai_agent.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mateus.spring_ai_agent.models.InterviewQuestion;
+import com.mateus.spring_ai_agent.models.InterviewQuiz;
 import com.mateus.spring_ai_agent.tools.CalculatorTools;
 import com.mateus.spring_ai_agent.tools.DateTimeTools;
 
@@ -48,4 +49,16 @@ public class ChatController {
                 .entity(InterviewQuestion.class);
     
     }
+
+    @GetMapping("/quiz")
+    public InterviewQuiz quiz(@RequestParam String topic) {
+        return chatClient.prompt()
+                .user("""
+                Generate 3 different Java interview questions about: %s.
+                For each one, include a short correct answer and the difficulty (easy, medium or hard).
+                """.formatted(topic))
+                .call()
+                .entity(InterviewQuiz.class);
+    }
+    
 }
