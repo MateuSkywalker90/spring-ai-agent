@@ -2,9 +2,13 @@ package com.mateus.spring_ai_agent.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mateus.spring_ai_agent.tools.CalculatorTools;
 import com.mateus.spring_ai_agent.tools.DateTimeTools;
 
+
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -14,10 +18,14 @@ public class ChatController {
     
     private final ChatClient chatClient;
 
-    public ChatController(ChatClient.Builder builder, DateTimeTools dateTimeTools) {
+    public ChatController(ChatClient.Builder builder, 
+                          DateTimeTools dateTimeTools, 
+                          CalculatorTools calculatorTools, 
+                          @Value("classpath:prompts/system-prompt.st") 
+    Resource systemPrompt) {
         this.chatClient = builder
-        .defaultSystem("You are a helpful assistant. Use tools when you need real-time information")
-        .defaultTools(dateTimeTools)
+        .defaultSystem(systemPrompt)
+        .defaultTools(dateTimeTools, calculatorTools)
         .build();
     }
 
