@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mateus.spring_ai_agent.dto.AnswerRequest;
 import com.mateus.spring_ai_agent.dto.Evaluation;
+import com.mateus.spring_ai_agent.dto.Question;
 import com.mateus.spring_ai_agent.dto.StartInterviewRequest;
 import com.mateus.spring_ai_agent.dto.StartInterviewResponse;
-import com.mateus.spring_ai_agent.dto.Question;
+
+import jakarta.validation.Valid;
 
 @RestController 
 @RequestMapping("/interviews")
@@ -35,7 +37,7 @@ public class InterviewController {
         }
 
     @PostMapping 
-    public StartInterviewResponse start(@RequestBody StartInterviewRequest request) {
+    public StartInterviewResponse start(@Valid @RequestBody StartInterviewRequest request) {
         String interviewId = UUID.randomUUID().toString();
 
         Question firstQuestion = chatClient.prompt()
@@ -53,7 +55,7 @@ public class InterviewController {
 
     @PostMapping("/{interviewId}/answers")
     public Evaluation answer(@PathVariable String interviewId, 
-                             @RequestBody AnswerRequest request) {
+                             @Valid @RequestBody AnswerRequest request) {
         return chatClient.prompt()
                 .user("""
                         My answer to your last question: %s
