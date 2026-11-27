@@ -7,6 +7,7 @@ import com.mateus.spring_ai_agent.models.InterviewQuiz;
 import com.mateus.spring_ai_agent.tools.CalculatorTools;
 import com.mateus.spring_ai_agent.tools.DateTimeTools;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
+@Tag(name = "Playground", description = "AI-powered Java interview sessions")
 @RestController 
 public class ChatController {
     

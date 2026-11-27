@@ -21,9 +21,11 @@ import com.mateus.spring_ai_agent.dto.Question;
 import com.mateus.spring_ai_agent.dto.StartInterviewRequest;
 import com.mateus.spring_ai_agent.dto.StartInterviewResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-
+@Tag(name = "Interviews", description = "AI-powered Java interview sessions")
 @RestController 
 @RequestMapping("/interviews")
 public class InterviewController {
@@ -43,6 +45,9 @@ public class InterviewController {
                 .build();
         }
 
+    @Operation(summary = "Start a new interview session", 
+               description = "Initiates a new interview session with a unique ID and returns the first question."
+               )
     @PostMapping 
     public StartInterviewResponse start(@Valid @RequestBody StartInterviewRequest request) {
         String interviewId = UUID.randomUUID().toString();
@@ -60,6 +65,9 @@ public class InterviewController {
         return new StartInterviewResponse(interviewId, firstQuestion.question());
     }
 
+    @Operation(summary = "Submit an answer", 
+               description = "Submits an answer to the current interview question and returns the evaluation."
+               )
     @PostMapping("/{interviewId}/answers")
     public Evaluation answer(@PathVariable String interviewId, 
                              @Valid @RequestBody AnswerRequest request) {
@@ -75,6 +83,9 @@ public class InterviewController {
                 .entity(Evaluation.class);
     }
 
+    @Operation(summary = "Get interview report", 
+               description = "Retrieves the final report for a completed interview session."
+               )
     @GetMapping("/{interviewId}/report")
     public FinalReport report(@PathVariable String interviewId) {
         if (chatMemory.get(interviewId).isEmpty()) {
