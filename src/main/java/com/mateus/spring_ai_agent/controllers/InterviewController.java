@@ -5,26 +5,33 @@ import java.util.UUID;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.mateus.spring_ai_agent.dto.AnswerRequest;
 import com.mateus.spring_ai_agent.dto.Evaluation;
+import com.mateus.spring_ai_agent.dto.FinalReport;
 import com.mateus.spring_ai_agent.dto.Question;
 import com.mateus.spring_ai_agent.dto.StartInterviewRequest;
 import com.mateus.spring_ai_agent.dto.StartInterviewResponse;
 
 import jakarta.validation.Valid;
 
+
 @RestController 
 @RequestMapping("/interviews")
 public class InterviewController {
     private final ChatClient chatClient;
+    private final ChatMemory chatMemory;
 
     public InterviewController(ChatClient.Builder builder, ChatMemory chatMemory) {
+        this.chatMemory = chatMemory;
         this.chatClient = builder
                 .defaultSystem("""
                         You are a professional Java technical interviewer.
@@ -67,4 +74,26 @@ public class InterviewController {
                 .call()
                 .entity(Evaluation.class);
     }
+
+    @GetMapping("/{interviewId}/report")
+    public FinalReport report(@PathVariable String interviewId) {
+        if (chatMemory.get(interviewId).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found: " + interviewId);
+        }
+        
+        return chatClient.prompt()
+                .user(""" 
+                        The interview is over. Do not ask any more questions.
+                        Based on all my answers in this interview, create a final report with:
+                        - an overall score from 0 to 10
+                        - a short summary of my performance
+                        - my strengths
+                        - the topics I need to improve
+                        - specific study recommendations
+                        """)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, interviewId))
+                .call()
+                .entity(FinalReport.class);
+    }
+    
 }
